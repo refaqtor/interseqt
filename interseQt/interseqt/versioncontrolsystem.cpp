@@ -1,3 +1,10 @@
+/****************************************************************************
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this file,
+* You can obtain one at http://mozilla.org/MPL/2.0/.
+*
+* Copyright (c) 2016, shannon.mackey@refaqtory.com
+* ***************************************************************************/
 #include "versioncontrolsystem.h"
 
 #include <QDebug>
@@ -41,7 +48,7 @@ void VersionControlSystem::gitInit()
         qDebug() << "initialization failed : " << ignore_file;
     } else {
         Q_ASSERT(QFile::exists(ignore_file));
-        gitCommit("begin chronicle");
+        gitCommit("git init");
     }
 }
 

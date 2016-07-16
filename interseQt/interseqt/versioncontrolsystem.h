@@ -1,5 +1,12 @@
-#ifndef CAPACITOR_H
-#define CAPACITOR_H
+/****************************************************************************
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this file,
+* You can obtain one at http://mozilla.org/MPL/2.0/.
+*
+* Copyright (c) 2016, shannon.mackey@refaqtory.com
+* ***************************************************************************/
+#ifndef VERSIONCONTROLSYSTEM_H
+#define VERSIONCONTROLSYSTEM_H
 
 #include <QFile>
 #include <QMap>
@@ -36,4 +43,4 @@ private:
     QString gitOutput(QStringList args);
 };
 
-#endif // CAPACITOR_H
+#endif // VERSIONCONTROLSYSTEM_H

@@ -10,10 +10,16 @@ TARGET = interseqt
 TEMPLATE = lib
 CONFIG += staticlib
 
-SOURCES += interseqt.cpp
+SOURCES += interseqt.cpp \
+    mapfile.cpp \
+    processconnection.cpp \
+    versioncontrolsystem.cpp
 
-HEADERS += interseqt.h
+HEADERS += interseqt.h \
+    mapfile.h \
+    processconnection.h \
+    versioncontrolsystem.h
 unix {
-    target.path = /usr/lib
+    target.path = /usr/libR
     INSTALLS += target
 }

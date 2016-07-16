@@ -1,82 +1,120 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this file,
-// You can obtain one at http://mozilla.org/MPL/2.0/.
-
-// Copyright (c) 2015, Shannon Mackey refaQtor@gmail.com
-
-
+/****************************************************************************
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this file,
+* You can obtain one at http://mozilla.org/MPL/2.0/.
+*
+* Copyright (c) 2016, shannon.mackey@refaqtory.com
+* ***************************************************************************/
 #include "processconnection.h"
 
 #include <QFileInfo>
 #include <QDir>
+#include <QStandardPaths>
 #include <QDebug>
 
-//#include <//qDebug>
+QString appLocalDataLocation()
+{
+    return QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation)
+                .value(0,QDir::homePath());
+}
+
+QString extractResourceFile(QString resource_filepath, QString disk_filename, bool executable = false)
+{  //this resource extraction requires "Q_INIT_RESOURCE(data);" in the constructor
+    bool ok = false;
+    QString local_file_path = appLocalDataLocation();
+
+    qDebug() << "extraction: " << local_file_path;
+
+    QDir dir;
+    ok = dir.mkpath(local_file_path);
+    if (!ok) qDebug() << QString("ERROR: %1 folder creation failed.").arg(local_file_path);
+
+    local_file_path.append("/" + disk_filename);
+    QFile::remove(local_file_path);
+
+    ok = QFile::copy(resource_filepath,local_file_path);
+    if (!ok) qDebug() << QString("ERROR: %1 file copy to %2 failed.").arg(resource_filepath).arg(local_file_path);
+
+    QFile new_file(local_file_path);
+    if (!executable){
+        ok = new_file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+    } else {
+        ok = new_file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+    }
+
+    if (!ok) qDebug() << QString("ERROR: %1 permission settings failed.").arg(local_file_path);
+
+    if (ok)
+        return new_file.fileName();
+    else
+        return QString("");
+}
 
 ProcessConnection::ProcessConnection(QString exe_pathname, QObject *parent) :
     QObject(parent),
-    _output(QString(""))
+    gitOutput(QString(""))
 {
-    executeChronicled(QStringList() << exe_pathname);
+    executeGit(QStringList() << exe_pathname);
 }
 
-void ProcessConnection::executeChronicled(QStringList args)
+void ProcessConnection::executeGit(QStringList args)
 {
-    _output.clear();
+    gitOutput.clear();
     QFileInfo fi(args.value(0));
     QString working_directory(fi.absolutePath());
 
     QDir::setCurrent(working_directory);
-    _chronicled_run = new QProcess(qobject_cast<QObject *>(this));
-   // _chronicled_run = new QProcess();
+    //TODO: delete lastQProcess pointer, if exists, before settingnew one
+    gitProcess = new QProcess(qobject_cast<QObject *>(this));
+   // gitProcess = new QProcess();
 
-    _chronicled_run->setReadChannel(QProcess::StandardOutput);
+    gitProcess->setReadChannel(QProcess::StandardOutput);
 
-    connect(_chronicled_run, &QProcess::readyRead,
+    connect(gitProcess, &QProcess::readyRead,
     this, &ProcessConnection::harvestOutput);
-    connect(_chronicled_run, &QProcess::readyReadStandardError,
+    connect(gitProcess, &QProcess::readyReadStandardError,
             this, &ProcessConnection::harvestOutput);
-    connect(_chronicled_run, &QProcess::readyReadStandardOutput,
+    connect(gitProcess, &QProcess::readyReadStandardOutput,
             this, &ProcessConnection::harvestOutput);
 
-    _chronicled_run->setWorkingDirectory(working_directory);
+    gitProcess->setWorkingDirectory(working_directory);
 
-    _chronicled_run->setProcessChannelMode(QProcess::MergedChannels);
+    gitProcess->setProcessChannelMode(QProcess::MergedChannels);
     qDebug() << args;
-    _chronicled_run->start(args.value(0), args);
-    qDebug() << _chronicled_run->waitForStarted();
-    qDebug() << _chronicled_run->state();
+    gitProcess->start(args.value(0), args);
+    qDebug() << gitProcess->waitForStarted();
+    qDebug() << gitProcess->state();
 
-//        _chronicled_run->waitForReadyRead();
-//        _chronicled_run->waitForFinished();
-//        _chronicled_run->deleteLater();
+//        gitProcess->waitForReadyRead();
+//        gitProcess->waitForFinished();
+//        gitProcess->deleteLater();
 }
 
 void ProcessConnection::sendCommand(QString cmd, QString payload)
 {
     QString stuff = QString("%1 %2\n").arg(cmd).arg(payload);
-    _chronicled_run->write(stuff.toLocal8Bit());
+    gitProcess->write(stuff.toLocal8Bit());
 }
 
 void ProcessConnection::harvestOutput()
 {
     //qDebug("harvestOutput");
 
-    QString msg = _chronicled_run->readAllStandardOutput();
+    QString msg = gitProcess->readAllStandardOutput();
     if (msg != "") {
                 //qDebug() << msg;
-        _output.append(msg.remove("\""));
+        gitOutput.append(msg.remove("\""));
     }
-    QString err = _chronicled_run->readAllStandardError();
+    QString err = gitProcess->readAllStandardError();
     if (err != ""){
                 //qDebug() << err;
-        _output.append(err);
+        gitOutput.append(err);
     }
     emit resultsReady();
 }
 
 QString ProcessConnection::output()
 {
-    return _output;
+    return gitOutput;
 }
 

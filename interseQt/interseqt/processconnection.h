@@ -1,10 +1,10 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this file,
-// You can obtain one at http://mozilla.org/MPL/2.0/.
-
-// Copyright (c) 2015, Shannon Mackey refaQtor@gmail.com
-
-
+/****************************************************************************
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this file,
+* You can obtain one at http://mozilla.org/MPL/2.0/.
+*
+* Copyright (c) 2016, shannon.mackey@refaqtory.com
+* ***************************************************************************/
 #ifndef PROCESSCONNECTION_H
 #define PROCESSCONNECTION_H
 
@@ -26,10 +26,10 @@ signals:
     void resultsReady();
 
 private:
-    QProcess *_chronicled_run;
-    QString _output;
+    QProcess *gitProcess;
+    QString gitOutput;
 
-    void executeChronicled(QStringList args);
+    void executeGit(QStringList args);
     void harvestOutput();
 };
 
