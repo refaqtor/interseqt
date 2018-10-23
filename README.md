@@ -11,3 +11,5 @@ initial use cases for which algorithms and explorations have been developed, in 
  - distributed execution of parallel jobs across multiple processor cores and machines
  - collection and aggregation of job results or sensor data
  
+work continues in a Nim version https://gitlab.com/refaQtor/mynimall 
+
